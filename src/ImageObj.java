@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 
-public class ImageObj extends JPanel implements MouseListener {
+public class ImageObj extends JPanel implements MouseListener, MouseWheelListener  {
 	
 	public BufferedImage img;
 	private BufferedImage resizedImage;
@@ -29,6 +31,7 @@ public class ImageObj extends JPanel implements MouseListener {
 	public ImageObj(){
 		super(new BorderLayout());
 		addMouseListener(this);
+		addMouseWheelListener(this);
 		img = new BufferedImage(400,300,BufferedImage.TYPE_INT_ARGB);
 		resizedImage = null;
 		alignFlag = false;
@@ -37,6 +40,8 @@ public class ImageObj extends JPanel implements MouseListener {
 	public void readImage(String patch){		
 	    try {
 	            img = ImageIO.read(new File(patch));
+	            resizedImage = img;
+	            zoom = 1;
 	    }catch (IOException e){
 	        System.out.println("Error");
 	    }
@@ -56,7 +61,18 @@ public class ImageObj extends JPanel implements MouseListener {
 	            newImage.setRGB( height-1-j, i, img.getRGB(i,j) );
 	 
 	    img = newImage;
+	    
+		int widthr  = resizedImage.getWidth();
+		int heightr = resizedImage.getHeight();
+		    BufferedImage newImageres = new BufferedImage( heightr, widthr, resizedImage.getType() );
+		 
+		for( int i=0 ; i < widthr ; i++ )
+		    for( int j=0 ; j < heightr ; j++ )
+		    	newImageres.setRGB( heightr-1-j, i, resizedImage.getRGB(i,j) );
+		 
+		resizedImage = newImageres;
 	}
+	
 	public void rotateCCw()
 	{
 	    int width  = img.getWidth();
@@ -68,10 +84,22 @@ public class ImageObj extends JPanel implements MouseListener {
 	            newImage.setRGB( j, width-1-i, img.getRGB(i,j) );
 	 
 	    img = newImage;
+	    
+		int widthr  = resizedImage.getWidth();
+		int heightr = resizedImage.getHeight();
+		    BufferedImage newImageres = new BufferedImage( heightr, widthr, resizedImage.getType() );
+		 
+		for( int i=0 ; i < widthr ; i++ )
+		    for( int j=0 ; j < heightr ; j++ )
+		    	newImageres.setRGB( j, widthr-1-i, resizedImage.getRGB(i,j) );
+		 
+		resizedImage = newImageres;
 	}
 	
 	public void clearImg(){
+		
 		img = new BufferedImage(400,300,BufferedImage.TYPE_INT_ARGB);
+		resizedImage = new BufferedImage(400,300,BufferedImage.TYPE_INT_ARGB);
 	}
 	
 	public void resizeImg(){
@@ -83,12 +111,12 @@ public class ImageObj extends JPanel implements MouseListener {
 		g.dispose();
 	}
 	public void zoomInImg(){
-		 zoom = zoom*2;
+		 zoom = zoom*1.3;
 		 resizeImg();
 	}
 	
 	public void zoomOutImg(){
-		 zoom = zoom/2.0;
+		 zoom = zoom/1.3;
 		 resizeImg();
 	}
 	
@@ -166,6 +194,19 @@ public class ImageObj extends JPanel implements MouseListener {
 
 		this.revalidate();
 		this.repaint();
+	}
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent arg0) {
+		int notches = arg0.getWheelRotation();
+	    if (notches < 0) {
+			zoomInImg();
+    		this.revalidate();
+    		this.repaint();
+	    } else {
+			zoomOutImg();
+    		this.revalidate();
+    		this.repaint();
+	   }
 	}
 
 
