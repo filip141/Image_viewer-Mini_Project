@@ -1,7 +1,9 @@
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,15 +12,27 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 
-public class ImageObj extends JPanel{
+public class ImageObj extends JPanel implements MouseListener {
 	
 	public BufferedImage img;
+	private BufferedImage resizedImage;
 	public boolean imReaded;
 	private Dimension dimension;
+	public boolean alignFlag;
+	private int margin;
+	private double zoom;
+	private int dragposition;
+	private int dragpositionh;
+	private int xposepress;
+	private int yposepress;
 
 	public ImageObj(){
-		super();
+		super(new BorderLayout());
+		addMouseListener(this);
 		img = new BufferedImage(400,300,BufferedImage.TYPE_INT_ARGB);
+		resizedImage = null;
+		alignFlag = false;
+		zoom = 1;
 	}
 	public void readImage(String patch){		
 	    try {
@@ -60,31 +74,100 @@ public class ImageObj extends JPanel{
 		img = new BufferedImage(400,300,BufferedImage.TYPE_INT_ARGB);
 	}
 	
-	public void resizeImg(int height, int width){
-		BufferedImage resizedImage = new BufferedImage(width , height, img.getType());
+	public void resizeImg(){
+		int width  = (int)(img.getWidth()*zoom);
+		int height = (int)(img.getHeight()*zoom);
+		resizedImage = new BufferedImage(width , height, img.getType());
 		Graphics2D g = resizedImage.createGraphics();
 		g.drawImage(img, 0, 0, width , height , null);
 		g.dispose();
-		img = resizedImage;
 	}
 	public void zoomInImg(){
-		 int width  = img.getWidth()*2;
-		 int height = img.getHeight()*2;
-		 resizeImg(height, width);
-
+		 zoom = zoom*2;
+		 resizeImg();
 	}
 	
 	public void zoomOutImg(){
-		 int width  = (int)(img.getWidth()*0.5);
-		 int height = (int)(img.getHeight()*0.5);
-		 resizeImg(height, width);
-
+		 zoom = zoom/2.0;
+		 resizeImg();
+	}
+	
+	public void allignleft(int margintmp){
+		
+		margin = margintmp;
+		if(alignFlag == false){
+			alignFlag = true;
+		}else
+		{
+			alignFlag = false;
+		}
+		
 	}
 	
     @Override
     public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         Graphics2D g2d = (Graphics2D)g;
-        g2d.drawImage(img, 0, 0, this);
+        if(zoom != 1){
+            int x = (this.getWidth() - resizedImage.getWidth(null)) / 2;
+            int y = (this.getHeight() - resizedImage.getHeight(null)) / 2;
+            
+            if(alignFlag == true){
+            	g2d.drawImage(resizedImage, margin, y, null);
+            }else
+            {
+            	g2d.drawImage(resizedImage, x + dragposition/2, y + dragpositionh/2, null);
+            }
+            
+
+        }
+        else{
+        	
+        	int x = (this.getWidth() - img.getWidth(null)) / 2;
+        	int y = (this.getHeight() - img.getHeight(null)) / 2;
+        
+        
+        	if(alignFlag == true){
+        		g2d.drawImage(img, margin, y, null);
+        	}else
+        	{
+        		g2d.drawImage(img, x + dragposition/2, y + dragpositionh/2, null);
+            }
+        
+        }
+
     }
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mousePressed(MouseEvent e) {
+		xposepress = Math.abs(e.getX());
+		yposepress = Math.abs(e.getY());
+	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		
+		dragposition = dragposition + (Math.abs(e.getX()) - xposepress);
+		
+		dragpositionh = dragpositionh + (Math.abs(e.getY()) - yposepress);
+
+		this.revalidate();
+		this.repaint();
+	}
+
+
 
 }

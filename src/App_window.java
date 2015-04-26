@@ -1,5 +1,6 @@
 import java.awt.EventQueue;
 
+
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
@@ -10,9 +11,11 @@ import javax.swing.JPanel;
 import java.awt.FlowLayout;
 
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.event.ActionListener;
@@ -25,6 +28,7 @@ public class App_window{
 
 	private JFrame frame;
 	private String fpatch;
+	private String filename;
 
 	/**
 	 * Launch the application.
@@ -65,6 +69,8 @@ public class App_window{
 		final JPanel panel_1 = new ImageObj();
 		frame.getContentPane().add(panel_1, BorderLayout.CENTER);
 		
+		final JLabel label = new JLabel("");
+		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 		
@@ -81,6 +87,7 @@ public class App_window{
 				    int returnVal = chooser.showOpenDialog(null);
 			        if (returnVal == JFileChooser.APPROVE_OPTION) {
 			        	fpatch = chooser.getSelectedFile().getAbsolutePath();
+			        	filename = chooser.getSelectedFile().getName();
 			    		((ImageObj) panel_1).readImage(fpatch);
 			    		frame.setSize(((ImageObj) panel_1).img.getWidth(),((ImageObj) panel_1).img.getHeight());
 			    		panel_1.revalidate();
@@ -112,7 +119,10 @@ public class App_window{
 				        }
 				}
 				else{
-					System.out.println("Error no image selected");
+					JOptionPane.showMessageDialog(frame,
+						    "To be able to save image you should choose one first",
+						    "Warning",
+						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
@@ -143,8 +153,6 @@ public class App_window{
 		});
 		mnFile.add(mntmShowContainingFolder);
 		
-		JMenuItem mntmProperties = new JMenuItem("Properties");
-		mnFile.add(mntmProperties);
 		
 		JMenuItem mntmClose = new JMenuItem("Close");
 		mntmClose.addActionListener(new ActionListener() {
@@ -184,8 +192,8 @@ public class App_window{
 		mntnZoomout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				((ImageObj) panel_1).zoomOutImg();
-				panel_1.revalidate();
-				panel_1.repaint();
+	    		panel_1.revalidate();
+	    		panel_1.repaint();
 			}
 		});
 		mnNewMenu.add(mntnZoomout);
@@ -194,8 +202,8 @@ public class App_window{
 		mntnZoomin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				((ImageObj) panel_1).zoomInImg();
-				panel_1.revalidate();
-				panel_1.repaint();
+	    		panel_1.revalidate();
+	    		panel_1.repaint();
 			}
 		});
 		mnNewMenu.add(mntnZoomin);
@@ -218,15 +226,48 @@ public class App_window{
 		menuBar.add(mnNewMenu_1);
 		
 		JMenuItem mntmFullscreen = new JMenuItem("Fullscreen");
+		mntmFullscreen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				frame.setExtendedState(frame.MAXIMIZED_BOTH);
+			}
+		});
 		mnNewMenu_1.add(mntmFullscreen);
 		
 		JMenuItem mntmSidePanel = new JMenuItem("Side Panel");
+		mntmSidePanel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				frame.setSize(frame.getWidth() + 100, frame.getHeight());
+				label.setText("<html><tab><i>  Image Name : </i></tab><br>" + "<br><i><b>  " + filename + "</i></b><br><br>"+ "<tab><i>  Resolution : </i></tab><br>"+ "<br><i><b>  " + ((ImageObj) panel_1).img.getWidth() + "x" + ((ImageObj) panel_1).img.getHeight() + "</i></b><br><br>"+ "</html>"  );
+				((ImageObj) panel_1).allignleft(((int)label.getPreferredSize().getWidth()));
+				panel_1.add(label, BorderLayout.WEST);
+				if(((ImageObj) panel_1).alignFlag == false){
+					
+					frame.setSize(((ImageObj) panel_1).img.getWidth(),((ImageObj) panel_1).img.getHeight());
+					label.setText(null);
+				}else
+				{
+					label.setVerticalTextPosition(JLabel.TOP);
+					frame.setSize(((ImageObj) panel_1).img.getWidth()+((int)label.getPreferredSize().getWidth()),((ImageObj) panel_1).img.getHeight());
+				}
+				
+	    		panel_1.revalidate();
+	    		panel_1.repaint();
+			}
+		});
 		mnNewMenu_1.add(mntmSidePanel);
 		
 		JMenu mnHelp = new JMenu("Help");
 		menuBar.add(mnHelp);
 		
 		JMenuItem mntmAbout = new JMenuItem("About");
+		mntmAbout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(frame,
+					    "Java image viewer BETA version 1.0",
+					    "About",
+					    JOptionPane.PLAIN_MESSAGE);
+			}
+		});
 		mnHelp.add(mntmAbout);
 		
 		
